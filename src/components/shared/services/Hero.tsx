@@ -1,4 +1,4 @@
-import heroImage from "../../../assets/images/hero2.png";
+import heroImage from "../../../assets/images/servi.png";
 
 const Hero = () => {
   return (
@@ -12,7 +12,7 @@ const Hero = () => {
         {/* Content */}
         <div className="relative flex flex-col items-center text-center text-white gap-4 md:gap-6 max-w-3xl">
           <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl leading-snug sm:leading-tight">
-            Find Your Dream Home <br /> With Ease
+            Your Trusted Cleaning  <br /> Partner
           </h1>
 
           <div className="flex flex-wrap justify-center gap-2 text-xs sm:text-sm font-medium">
