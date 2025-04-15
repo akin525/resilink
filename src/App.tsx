@@ -8,6 +8,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Home from "./pages/home/Home";
 import Services from "./pages/services/Home";
+import List from "./pages/list/Home";
+import About from "./pages/about/Home";
 import { ProgressBarLoader } from "./components/shared/loaders/Loaders";
 import { useEffect, useState } from "react";
 import MainLayout from "./components/layouts/mainlayout/MainLayout";
@@ -69,6 +71,8 @@ const App = () => {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/lists" element={<List />} />
+          <Route path="/about" element={<About />} />
           <Route path="/listings/details/:id" element={<ListingDetail />} />
         </Route>
         <Route path="/register" element={<Register />} />
