@@ -63,15 +63,17 @@ const Register = () => {
   };
   return (
     <>
-      <section className="w-full h-screen overflow-y-auto px-2 py-14 ">
+      <section className=" bg-[#0000cc] w-full h-screen overflow-y-auto px-2 py-14 ">
         <section className="w-full flex justify-center pt-5 md:pt-10 pb-5">
-          <Logo color="black" />
+          <div className="absolute top-5 left-5">
+            <Logo color="white"/>
+          </div>
         </section>
         <section className="w-full mb-7 flex-col justify-center items-center gap-1 inline-flex">
-          <section className="text-center text-black text-[22px] font-semibold">
+          <section className="text-center text-white text-[22px] font-semibold">
             Create an Account
           </section>
-          <section className="text-center text-neutral-800 text-opacity-80 text-sm font-normal">
+          <section className="text-center text-white text-neutral-800 text-opacity-80 text-sm font-normal">
             Sign up now to get started with an account.
           </section>
         </section>
@@ -123,10 +125,10 @@ const Register = () => {
             <section className="flex items-center mb-3">
               <input type="checkbox" className="bg-transparent outline-none" />
               <section className="pl-2">
-                <span className="text-neutral-500 text-xs font-medium">
+                <span className=" text-xs font-medium text-white">
                   I have read and agree to the
                 </span>
-                <span className="text-violet-500 text-xs font-medium underline pl-1 cursor-pointer">
+                <span className="text-white text-xs font-medium underline pl-1 cursor-pointer">
                   Terms of Service
                 </span>
               </section>
@@ -149,7 +151,7 @@ const Register = () => {
               ) : (
                 <section className="w-fit">
                   <ButtonBg
-                    className="py-3 px-10 bg-bc"
+                    className="py-3 px-10 bg-white"
                     onClick={handleRegister}
                     disabled={
                       formData.firstName.trim() === "" ||
@@ -164,10 +166,10 @@ const Register = () => {
               )}
             </section>
             <section className="flex justify-center items-center">
-              <div className="text-center text-neutral-500 text-[13px] font-normal leading-none">
+              <div className="text-center text-white text-[13px] font-normal leading-none">
                 Already have an account?
               </div>
-              <div className="text-center text-bc pl-1 text-[13px] font-semibold">
+              <div className="text-center text-white pl-1 text-[13px] font-semibold">
                 <Link to="/login">Log in</Link>
               </div>
             </section>

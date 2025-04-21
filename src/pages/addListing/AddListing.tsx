@@ -155,106 +155,128 @@ const AddListing: React.FC = () => {
     ]
 
     return (
-        <section className='w-full h-full overflow-y-scroll p-4 pb-40'>
-            <section className='mb-5 flex justify-between items-center'>
-                <section className='text-left py-4'>
-                    <h2 className='text-2xl tracking-wide text-[#202224] font-bold'>Add Listing</h2>
-                </section>
-            </section>
-            <section>
-                <form onSubmit={handleSubmit}>
-                    <section className="w-full mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        <CustomInput
-                            label={"Title"}
-                            type={"text"}
-                            name={"title"}
-                            placeholder={"Solicit Hostel"}
-                            handleChange={handleChange}
-                        />
+        <section className="w-full h-full overflow-y-scroll p-6 pb-40 bg-[#F4F6FB]">
+            {/* Top Bar with Search */}
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl tracking-wide text-[#202224] font-bold">Add Property</h2>
+                <div className="flex items-center bg-[#FFF2C6] rounded-xl px-2 py-1 w-64">
+                    <input
+                        type="text"
+                        placeholder="Search"
+                        className="flex-1 bg-transparent text-sm px-3 py-1 text-[#202224] placeholder:text-[#202224] outline-none"
+                    />
+                    <button className="bg-[#FFB400] text-white px-4 py-2 rounded-xl text-sm font-semibold">
+                        Search
+                    </button>
+                </div>
+            </div>
+
+            {/* Main Grid */}
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left: Upload Box */}
+                <div className="bg-white rounded-xl p-6 shadow-sm">
+                    <h3 className="text-sm font-semibold mb-2 text-[#202224]">
+                        Upload your property image here. Please click Upload Image button
+                    </h3>
+                    <p className="text-xs text-gray-500 mb-4">
+                        Supports .JPG, .PNG, .PDF, or .MP4. Max file size: 10MB
+                    </p>
+                    <CustomUpload
+                        label={"Upload Image"}
+                        images={images}
+                        handleClick={handleClick}
+                        handleFileChange={handleFileChange}
+                        inputRef={inputRef}
+                        handleEdit={handleEdit}
+                        handleRemove={handleRemove}
+                    />
+                </div>
+
+                {/* Right: Form Box */}
+                <div className="bg-white rounded-xl p-6 shadow-sm space-y-4">
+                    <CustomInput
+                        label={"Title:"}
+                        type={"text"}
+                        name={"title"}
+                        placeholder={"Property Title"}
+                        handleChange={handleChange}
+                    />
+                    <div className="grid grid-cols-2 gap-3">
                         <CustomSelect
-                            label={"Property Type"}
+                            label={"Type:"}
                             options={listingTypes}
                             name={"type"}
                             handleChange={handleChange}
                         />
                         <CustomSelect
-                            label={"Property Mode"}
+                            label={"Mode:"}
                             options={listingMode}
                             name={"mode"}
                             handleChange={handleChange}
                         />
+                    </div>
+                    <CustomInput
+                        label={"Price:"}
+                        type={"number"}
+                        name={"price"}
+                        placeholder={"₦0.00"}
+                        handleChange={handleChange}
+                    />
+                    <div className="grid grid-cols-2 gap-3">
                         <CustomInput
-                            label={"Property Price"}
+                            label={"Commission:"}
                             type={"number"}
-                            name={"price"}
-                            placeholder={"50000"}
+                            name={"commission"}
+                            placeholder={"₦0.00"}
                             handleChange={handleChange}
                         />
+                        <CustomSelect
+                            label={"State:"}
+                            options={[
+                                {text: "Edo", value: "EDO"},
+                                {text: "Lagos", value: "LAGOS"},
+                            ]}
+                            name={"state"}
+                            handleChange={handleChange}
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
                         <CustomInput
-                            label={"Max Rooms"}
+                            label={"Rooms:"}
                             type={"number"}
                             name={"rooms"}
-                            placeholder={"1"}
+                            placeholder={"0"}
                             handleChange={handleChange}
                         />
                         <CustomInput
-                            label={"Address"}
-                            type={"text"}
-                            name={"address"}
-                            placeholder={"N0 4, HRUM Hostel..."}
+                            label={"No of rooms:"}
+                            type={"number"}
+                            name={"rooms"}
+                            placeholder={"0"}
                             handleChange={handleChange}
                         />
-                        <CustomInput
-                            label={"City"}
-                            type={"text"}
-                            name={"city"}
-                            placeholder={"Benin"}
-                            handleChange={handleChange}
-                        />
-                        <CustomInput
-                            label={"State"}
-                            type={"text"}
-                            name={"state"}
-                            placeholder={"Edo"}
-                            handleChange={handleChange}
-                        />
-                        <CustomInput
-                            label={"Country"}
-                            type={"text"}
-                            name={"country"}
-                            placeholder={"Nigeria"}
-                            handleChange={handleChange}
-                        />
-                    </section>
-                    <section className='w-full'>
-                        <CustomTextArea
-                            label={"Description"}
-                            type={"text"}
-                            name={"description"}
-                            rows={6}
-                            placeholder={"Describe your Listing"}
-                            handleChange={handleChange}
-                        />
-                    </section>
-                    <section className='w-full mb-10'>
-                        <CustomUpload
-                            label={"Image (*JPEG*, *PNG*, *JPG*)"}
-                            images={images}
-                            handleClick={handleClick}
-                            handleFileChange={handleFileChange}
-                            inputRef={inputRef}
-                            handleEdit={handleEdit}
-                            handleRemove={handleRemove}
-                        />
-                    </section>
-                    <section className="flex justify-center">
-                        <section className='w-fit '>
-                            <ButtonBg className='bg-bc px-10 py-3 w-fit'>{loading ? "Submitting..." : "Submit"}</ButtonBg>
-                        </section>
-                    </section>
-                </form>
+                    </div>
+                    <CustomInput
+                        label={"Address:"}
+                        type={"text"}
+                        name={"address"}
+                        placeholder={"Property Address"}
+                        handleChange={handleChange}
+                    />
+                    <CustomTextArea
+                        label={"Description:"}
+                        name={"description"}
+                        rows={4}
+                        placeholder={"Write a short description..."}
+                        handleChange={handleChange}
+                    />
+                    <ButtonBg className="bg-[#0000C8] text-white w-full py-3 mt-2 rounded-xl font-semibold text-sm">
+                        {loading ? "Submitting..." : "Add Property"}
+                    </ButtonBg>
+                </div>
             </section>
         </section>
+
     )
 }
 

@@ -66,14 +66,15 @@ const TopNav: React.FC = () => {
         },
     ]
     return (
-        <section className='py-3 px-4 shadow-2xl w-full'>
+        <section className="py-3 px-4 shadow-2xl w-full bg-white">
             <section className="flex items-center justify-between">
-                <section>
-                    <BsList className='block lg:hidden text-2xl cursor-pointer'
-                        onClick={onToggle} />
-                </section>
-                <section className='flex items-center gap-5'>
-                    <BsBellFill className='text-2xl' />
+                <BsList
+                    className="block lg:hidden text-2xl cursor-pointer"
+                    onClick={onToggle}
+                />
+
+                <section className="flex items-center gap-5">
+                    <BsBellFill className="text-2xl"/>
                     {uLoading ? (
                         <section className="animate-pulse w-32">
                             <section className="flex w-full items-center cursor-pointer">
@@ -86,50 +87,76 @@ const TopNav: React.FC = () => {
                         </section>
                     ) : (
                         <section className="flex items-center gap-3 cursor-pointer">
-                            <img className='w-12 h-12' src={data?.profilePic} alt="" />
+                            <img className="w-12 h-12 rounded-full object-cover" src={data?.profilePic} alt="profile"/>
                             <section className="flex flex-col">
-                                <span className='font-bold'>{data?.firstName} {data?.lastName}</span>
-                                <span className='text-sm'>Agent</span>
+                <span className="font-bold">
+                  {data?.firstName} {data?.lastName}
+                </span>
+                                <span className="text-sm">Agent</span>
                             </section>
-                            {/* <LuChevronDownCircle className='text-lg' /> */}
-                        </section>)}
+                        </section>
+                    )}
                 </section>
             </section>
 
+            {/* Mobile Sidebar */}
             <section
-                className={`fixed top-0 left-0 h-full p-4 w-[250px] bg-bc text-white z-20 transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-[300px]"
-                    }`}
+                className={`fixed top-0 left-0 h-full w-[250px] bg-[#0100fe] text-white z-20 transition-transform duration-300 ease-in-out ${
+                    isSidebarOpen ? 'translate-x-0' : '-translate-x-[300px]'
+                }`}
             >
-                <section className="h-full w-full flex-col gap-y-[40px] items-center inline-flex py-[26px] ">
-                    <section className="h-full flex-col gap-y-[8px] justify-between items-start inline-flex">
-                        <section className="mb-7 flex gap-10 flex-col w-full justify-center" >
-                            <section className="w-full flex justify-center">
-                                <CgArrowLongLeft onClick={onToggle} className='text-2xl cursor-pointer' />
-                            </section>
-                            <Logo />
+                <section className="h-full w-full flex flex-col items-center gap-y-10 py-[26px]">
+                    {/* Top: Back + Logo */}
+                    <section className="flex flex-col items-center gap-5 w-full">
+                        <CgArrowLongLeft
+                            onClick={onToggle}
+                            className="text-2xl self-start ml-4 cursor-pointer"
+                        />
+                        <Logo color="white"/>
+                    </section>
+
+                    {/* Profile */}
+                    {!uLoading && (
+                        <section className="flex flex-col items-center gap-2 mt-4">
+                            <img
+                                src={data?.profilePic}
+                                alt="Profile"
+                                className="w-20 h-20 rounded-full object-cover border-4 border-white"
+                            />
+                            <p className="font-semibold">{data?.firstName} {data?.lastName}</p>
+                            <span className="text-sm text-gray-200">Agent</span>
                         </section>
-                        <section className="">
-                            <ul className="flex flex-col gap-10">
-                                {links.map((item, i) => (
-                                    <li key={i}>
-                                        <Link className="flex hover:text-bc items-center gap-1 text-lg" to={item.link}>
-                                            {item.icon}{item.label}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </section>
-                        <section className="">
-                            <ul className="flex flex-col gap-10">
-                                {links2.map((item, i) => (
-                                    <li key={i}>
-                                        <Link className="flex items-center gap-1 text-lg" to={item.link}>
-                                            {item.icon}{item.label}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </section>
+                    )}
+
+                    {/* Navigation */}
+                    <section className="w-full flex-1 flex flex-col justify-between mt-10 px-5">
+                        <ul className="flex flex-col gap-6">
+                            {links.map((item, i) => (
+                                <li key={i}>
+                                    <Link
+                                        className="flex items-center gap-2 text-base hover:text-[#ffffffcc]"
+                                        to={item.link}
+                                        onClick={onToggle}
+                                    >
+                                        {item.icon} {item.label}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <ul className="flex flex-col gap-6 mt-10">
+                            {links2.map((item, i) => (
+                                <li key={i}>
+                                    <Link
+                                        className="flex items-center gap-2 text-base hover:text-[#ffffffcc]"
+                                        to={item.link}
+                                        onClick={onToggle}
+                                    >
+                                        {item.icon} {item.label}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
                     </section>
                 </section>
             </section>

@@ -28,7 +28,7 @@ const Hero = () => {
             {["Vacant Apartments", "Cleaning Services", "Book Packing Truck"].map((service, idx) => (
                 <button
                     key={idx}
-                    className="border border-yellow-400 text-white px-4 sm:px-6 py-2 rounded-full text-xs sm:text-sm hover:bg-yellow-400 hover:text-[#0000A3] transition"
+                    className="border border-b-yellow-600 text-white px-4 sm:px-6 py-2 rounded-full text-xs sm:text-sm hover:bg-yellow-600 hover:text-[#0000A3] transition"
                 >
                   {service}
                 </button>
@@ -42,7 +42,7 @@ const Hero = () => {
                 placeholder="GRA, Festac, Harmony Av..."
                 className="flex-1 px-4 sm:px-5 py-3 text-gray-800 text-sm outline-none"
             />
-            <button className="bg-yellow-400 text-[#0000A3] font-semibold px-4 sm:px-6 py-3 text-sm hover:bg-yellow-300 transition w-full sm:w-auto">
+            <button className="bg-yellow-500 text-[#0000A3] font-semibold px-4 sm:px-6 py-3 text-sm hover:bg-yellow-500 transition w-full sm:w-auto">
               Search
             </button>
           </div>
