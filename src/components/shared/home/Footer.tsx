@@ -43,20 +43,20 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-3">Quick Contact</h3>
             <ul className="space-y-2 text-sm">
-              <li>📞 +234000000000</li>
-              <li>📧 hello@resilink.com</li>
+              <li>📞 +2348032926144</li>
+              <li>📧 info.resilink.@gmail.com</li>
             </ul>
             <div className="flex items-center gap-4 mt-4">
               <a href="https://www.facebook.com/profile.php?id=61561935312527" target="_blank" rel="noopener noreferrer">
                 <FaFacebook className={iconStyles} />
               </a>
-              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.instagram.com/resilink_housing_services?igsh=ZGUzMzM3NWJiOQ==" target="_blank" rel="noopener noreferrer">
                 <FaInstagram className={iconStyles} />
               </a>
-              <a href="https://x.com" target="_blank" rel="noopener noreferrer">
-                <FaTwitter className={iconStyles} />
-              </a>
-              <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer">
+              {/*<a href="https://x.com" target="_blank" rel="noopener noreferrer">*/}
+              {/*  <FaTwitter className={iconStyles} />*/}
+              {/*</a>*/}
+              <a href="https://wa.link/fakcpo" target="_blank" rel="noopener noreferrer">
                 <FaWhatsapp className={iconStyles} />
               </a>
             </div>

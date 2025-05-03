@@ -1,15 +1,31 @@
 import heroImage from "../../../assets/images/hero2.png";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const services = [
+    { label: "Vacant Apartments", path: "/lists" },
+    { label: "Cleaning Services", path: "/services" },
+    { label: "ParkMyLoad", path: "/lists/packing" },
+  ];
+
+  const handleServiceClick = (path: string) => {
+    setLoading(true);
+    setTimeout(() => {
+      navigate(path);
+    }, 500); // Simulate slight delay, adjust as needed
+  };
+
   return (
       <section
           className="relative w-full h-[80vh] md:h-[90vh] bg-cover bg-center bg-no-repeat flex items-center justify-center px-4 md:px-14"
           style={{ backgroundImage: `url(${heroImage})` }}
       >
-        {/* Overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-70"></div>
 
-        {/* Content */}
         <div className="relative flex flex-col items-center text-center text-white gap-4 md:gap-6 max-w-3xl">
           <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl leading-snug sm:leading-tight">
             Find Your Dream Home <br /> With Ease
@@ -25,12 +41,13 @@ const Hero = () => {
 
           {/* Service Buttons */}
           <div className="flex flex-wrap justify-center gap-3 mt-2 sm:mt-4">
-            {["Vacant Apartments", "Cleaning Services", "Book Packing Truck"].map((service, idx) => (
+            {services.map((service, idx) => (
                 <button
                     key={idx}
+                    onClick={() => handleServiceClick(service.path)}
                     className="border border-b-yellow-600 text-white px-4 sm:px-6 py-2 rounded-full text-xs sm:text-sm hover:bg-yellow-600 hover:text-[#0000A3] transition"
                 >
-                  {service}
+                  {service.label}
                 </button>
             ))}
           </div>
@@ -47,6 +64,12 @@ const Hero = () => {
             </button>
           </div>
         </div>
+
+        {loading && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1000]">
+              <div className="text-white text-lg font-semibold">Loading...</div>
+            </div>
+        )}
       </section>
   );
 };

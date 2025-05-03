@@ -1,7 +1,6 @@
-import heroImage from "../../../assets/images/servi.png";
-import {useNavigate} from "react-router-dom";
+import heroImage from "../../../assets/images/park.png";
+import { useNavigate} from "react-router-dom";
 import {useState} from "react";
-// import {Link} from "react-router-dom";
 
 const Hero = () => {
   const [loading, setLoading] = useState(false);
@@ -20,7 +19,7 @@ const Hero = () => {
   return (
       <section
           className="relative w-full h-[80vh] md:h-[90vh] bg-cover bg-center bg-no-repeat flex items-center justify-center px-4 md:px-14"
-          style={{ backgroundImage: `url(${heroImage})` }}
+          style={{backgroundImage: `url(${heroImage})`}}
       >
         {/* Overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-70"></div>
@@ -28,7 +27,7 @@ const Hero = () => {
         {/* Content */}
         <div className="relative flex flex-col items-center text-center text-white gap-4 md:gap-6 max-w-3xl">
           <h1 className="font-bold text-3xl sm:text-4xl md:text-5xl leading-snug sm:leading-tight">
-            Your Trusted Cleaning <br/> Partner
+            Find Your Dream Home<br/> With Ease
           </h1>
 
           <div className="flex flex-wrap justify-center gap-2 text-xs sm:text-sm font-medium">
@@ -73,7 +72,8 @@ const Hero = () => {
             </div>
         )}
       </section>
-  );
+  )
+      ;
 };
 
 export default Hero;

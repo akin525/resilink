@@ -1,168 +1,142 @@
-import React, { useEffect } from 'react';
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import { MdOutlineBathroom, MdOutlineBedroomParent } from 'react-icons/md';
-import { BsFillStarFill } from 'react-icons/bs';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-import { fetchListingDetails } from '../../features/auth-features/ListingSlice';
-import { RootState } from '../../types/Interface';
-import { domain } from '../../utils/helpers';
+import { useParams } from "react-router-dom";
+import { BsFillStarFill } from "react-icons/bs";
+import { BASE_URLNew } from "../../utils/apiRoutes.tsx";
+import { useEffect, useState } from "react";
+import logo from "/src/assets/react.svg";
 
-const ListingDetails: React.FC = () => {
-    const location = useLocation();
-    const listingId = location.pathname.split("/")[3];
-    const dispatch = useDispatch();
+const ListingDetails = () => {
+    const { id } = useParams();
+    const [listing, setListing] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [mainImage, setMainImage] = useState<string>("");
+
+    // const formatPhoneNumber = (phone: any) => {
+    //     if (!phone) return '';
+    //     const digits = phone.replace(/\D/g, '');
+    //     return digits.startsWith('0') ? `234${digits.slice(1)}` : digits;
+    // };
 
     useEffect(() => {
-        dispatch(fetchListingDetails(listingId));
-    }, [dispatch, listingId]);
+        const fetchListing = async () => {
+            try {
+                const response = await fetch(`${BASE_URLNew}/api/propertyid/${id}`);
+                const data = await response.json();
+                const property = data?.data;
 
-    const { listing_details, listing_details_loading } = useSelector((state: RootState) => state.listing);
-    console.log(listing_details);
+                let parsedImages: string[] = [];
+                try {
+                    if (typeof property.images === "string") {
+                        parsedImages = JSON.parse(property.images).map((img: string) =>
+                            `${BASE_URLNew}/public${img.replace("https://admin.resilink.com.ng", "")}`
+                        );
+                    } else if (Array.isArray(property.images)) {
+                        parsedImages = property.images.map((img: string) =>
+                            `${BASE_URLNew}/public${img.replace("https://admin.resilink.com.ng", "")}`
+                        );
+                    }
+                } catch (error) {
+                    console.error("Error parsing images:", error);
+                }
 
+                setListing({ ...property, images: parsedImages });
+                setMainImage(parsedImages[0] || "");
+                setLoading(false);
+            } catch (error) {
+                console.error("Error fetching property:", error);
+                setLoading(false);
+            }
+        };
 
-    const settings = {
-        dots: false,
-        infinite: true,
-        speed: 500,
-        autoplay: true,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-    };
+        fetchListing();
+    }, [id]);
 
-    if (listing_details_loading) {
-        return (
-            <div className="spinner">loading.....</div>
-        );
-    }
-
-    const baseUrl = domain()
-
-    // Function to generate a payment form link
-    const handleGenerateLink = (paymentType: string) => {
-        const link = `${baseUrl}/payment/${paymentType}/${listing_details._id}`;
-
-        navigator.clipboard.writeText(link).then(() => {
-            alert(`Form link copied to clipboard: ${link}`);
-        }).catch((err) => {
-            console.error("Failed to copy link: ", err);
-        });
-    };
+    if (loading) return <div className="p-10 text-center">Loading...</div>;
+    if (!listing) return <div className="p-10 text-center">Property not found</div>;
 
     return (
-        <section className='w-full h-full overflow-y-scroll p-4 pb-20'>
-            <section className='mb-5 flex justify-between items-center'>
-                <section className='text-left py-4'>
-                    <h2 className='text-2xl tracking-wide text-[#202224] font-bold'>Listing Details</h2>
-                </section>
-            </section>
-            <section className='w-full flex'>
-                <section className="w-full">
-                    <Slider {...settings}>
-                        {listing_details?.images?.map((image, index) => (
-                            <section className="w-full h-[400px]" key={index}>
-                                <section
-                                    className="bg-cover bg-no-repeat h-full object-center"
-                                    style={{ backgroundImage: `url(${image})` }}
-                                ></section>
-                            </section>
+        <div className="bg-gray-50 w-full h-full overflow-y-scroll p-4 pb-20">
+            <div className="max-w-4xl mx-auto">
+                {/* Main Image */}
+                <div className="rounded-xl overflow-hidden shadow-lg">
+                    <img
+                        src={mainImage}
+                        alt="Main Property"
+                        className="w-full h-[300px] sm:h-[400px] md:h-[450px] object-cover"
+                    />
+                </div>
+
+                {/* Thumbnails */}
+                {listing.images.length > 1 && (
+                    <div className="mt-4 grid grid-cols-5 gap-2 overflow-x-auto">
+                        {listing.images.slice(0, 5).map((img: string, i: number) => (
+                            <div
+                                key={i}
+                                className={`h-24 rounded-md overflow-hidden border-2 ${mainImage === img ? "border-[#0000A3]" : "border-transparent"} cursor-pointer`}
+                                onClick={() => setMainImage(img)}
+                            >
+                                <img
+                                    src={img}
+                                    alt={`Thumbnail ${i}`}
+                                    className="w-full h-full object-cover hover:opacity-80"
+                                />
+                            </div>
                         ))}
-                    </Slider>
-                    <section className="w-full my-5">
-                        <section className="p-10 shadow-xl md:flex justify-between items-center">
-                            <section>
-                                <section className="flex items-center gap-4 mb-5">
-                                    <h2 className="capitalize font-semibold text-3xl">{listing_details.title}</h2>
-                                    <span>
-                                        <span className="rounded-md py-2 px-5 font-medium text-sm text-white capitalize bg-bc shadow-md">
-                                            For {listing_details.mode}
-                                        </span>
-                                    </span>
-                                </section>
-                                <p className="mb-2">{listing_details.location.address}</p>
-                                <ul className="flex items-center gap-3">
-                                    <li className='my-2 text-base'>
-                                        <section className="flex items-center gap-2">
-                                            <MdOutlineBedroomParent />
-                                            <span>{listing_details.rooms} Rooms</span>
-                                        </section>
-                                    </li>
-                                    <li>
-                                        <section className='flex items-center gap-2'>
-                                            <MdOutlineBathroom />
-                                            <span>{listing_details.rooms} Bathrooms</span>
-                                        </section>
-                                    </li>
-                                </ul>
-                            </section>
-                            <section>
-                                <section className="flex gap-2 pb-2 justify-start md:justify-end text-bc2">
-                                    <BsFillStarFill />
-                                    <BsFillStarFill />
-                                    <BsFillStarFill />
-                                    <BsFillStarFill />
-                                    <BsFillStarFill />
-                                </section>
-                                <h2 className="font-semibold text-3xl">
-                                    ₦{listing_details.price}
-                                </h2>
-                            </section>
-                        </section>
-                        <section className="p-10 bg-white shadow-2xl mt-4">
-                            <h4 className="text-2xl mb-5 font-semibold">Property Details</h4>
-                            <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
-                                <div>
-                                    <span>Property Type :</span> {listing_details.type}
-                                </div>
-                                <div>
-                                    <span>Property ID :</span> {listing_details?._id}
-                                </div>
-                                <div>
-                                    <span>Property status :</span> For {listing_details?.status}
-                                </div>
-                                <div>
-                                    <span>Price :</span> ₦{listing_details?.price}
-                                </div>
-                                <div>
-                                    <span>Adress :</span> {listing_details.location.address}
-                                </div>
-                                <div>
-                                    <span>City :</span> {listing_details?.location.city}
-                                </div>
-                                {/* <div>
-                                    <span>Rooms :</span> {listing_details.rooms}
-                                </div>
-                                <div>
-                                    <span>Bedrooms :</span> {listing_details.rooms}
-                                </div> */}
-                                <div>
-                                    <span>Garage :</span> Available
-                                </div>
-                            </section>
-                            <h4 className="text-2xl mb-5 font-semibold">Brief Description</h4>
-                            <p>{listing_details.description}</p>
-                        </section>
-                        <section className="mt-5">
-                            {/* Generate Form Link Buttons */}
-                            <button
-                                className="px-6 py-3 bg-blue-600 text-white rounded-md mr-3"
-                                onClick={() => handleGenerateLink("inspection")}
-                            >
-                                Generate Inspection Fee Link
-                            </button>
-                            <button
-                                className="px-6 py-3 bg-green-600 text-white rounded-md"
-                                onClick={() => handleGenerateLink("main")}
-                            >
-                                Generate Main Payment Link
-                            </button>
-                        </section>
-                    </section>
-                </section>
-            </section>
-        </section>
+                    </div>
+                )}
+
+                {/* Title and Features */}
+                <div className="mt-6 text-center">
+                    <h1 className="text-xl font-semibold text-gray-900">
+                        {listing.title} in {listing.address} for rent
+                    </h1>
+                    <div className="mt-2 text-gray-600 text-sm flex justify-center gap-6 flex-wrap">
+                        <span>• {listing.type || null}</span>
+                        {/*<span>• 1 Parlour</span>*/}
+                        {/*<span>• {listing.kitchen || 1} Kitchen</span>*/}
+                    </div>
+                </div>
+
+                {/* Price */}
+                <div className="text-center mt-6 text-yellow-500 text-2xl font-bold">
+                    NGN {Number(listing.price).toLocaleString()}.00
+                    <span className="text-sm text-gray-500 font-normal">/Yr</span>
+                </div>
+
+                {/* Agent Card */}
+                <div className="mt-8 bg-[#f4f6ff] rounded-xl p-5 flex flex-col sm:flex-row justify-between items-center">
+                    <div className="flex items-center gap-4">
+                        <img
+                            src={logo}
+                            alt="Agent"
+                            className="w-14 h-14 rounded-full object-cover border-2 border-white"
+                        />
+                        <div>
+                            <h3 className="text-md font-semibold text-gray-800">{listing.posted_by.name}</h3>
+                            <p className="text-sm text-gray-600">{listing.posted_by.type}</p>
+                            <div className="flex items-center text-yellow-500 text-sm mt-1">
+                                <BsFillStarFill />
+                                <span className="ml-1">4.5</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="mt-4 sm:mt-0 text-gray-600 text-sm">{listing.created_at}</div>
+                </div>
+
+                {/* Contact Button */}
+                <div className="mt-6 flex justify-center">
+                    <a
+                        href={`https://wa.link/wrv6d0`}
+                        // href={`https://wa.me/${formatPhoneNumber(listing.posted_by.phone)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <button className="bg-[#0000A3] hover:bg-blue-900 text-white font-semibold px-8 py-3 rounded-md transition">
+                            Contact Now
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
     );
 };
 

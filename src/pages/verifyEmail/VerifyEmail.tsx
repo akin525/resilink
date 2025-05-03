@@ -1,22 +1,20 @@
 import { ButtonBg } from "../../components/shared/buttons/Buttons";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import Logo from "../../components/common/logo/Logo";
 import RoundLoader from "../../components/shared/loaders/RoundLoader";
-import { toastOptions } from "../../utils/helpers";
 import { toast } from "react-toastify";
-import { verifyEmail } from "../../features/unauth-features/UserSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { RegisterUserResponse, RootState } from "../../types/Interface";
+import { toastOptions } from "../../utils/helpers";
 
 const VerifyEmail = () => {
-    const dispatch = useDispatch();
-    const { loading } = useSelector((state: RootState) => state.user);
-    const navigate = useNavigate()
-
-    console.log(loading);
+    const navigate = useNavigate();
 
     const [email, setEmail] = useState<string>("");
+    const [verificationCode, setVerificationCode] = useState<string[]>(["", "", "", "", "", ""]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [resendLoading, setResendLoading] = useState<boolean>(false);
+    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const [rememberMe] = useState(false);
 
     useEffect(() => {
         const storedEmail = localStorage.getItem("userEmail");
@@ -25,130 +23,144 @@ const VerifyEmail = () => {
         }
     }, []);
 
-    const [verificationCode, setVerificationCode] = useState<string[]>(["", "", "", "", "", ""]);
-    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
     const handleChange = (index: number, value: string) => {
-        const newVerificationCode = [...verificationCode];
-        newVerificationCode[index] = value;
+        const updatedCode = [...verificationCode];
+        updatedCode[index] = value.slice(-1);
+        setVerificationCode(updatedCode);
 
-        // If the input has a value and it's not the last one, focus on the next input
         if (value && index < 5) {
             inputRefs.current[index + 1]?.focus();
         }
-
-        setVerificationCode(newVerificationCode);
     };
 
     const handleKeyDown = (index: number, event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === "Backspace" && !verificationCode[index] && index > 0) {
-            // If Backspace is pressed and the input is empty, focus on the previous input
             inputRefs.current[index - 1]?.focus();
         }
     };
 
-    const handleVerifyEmail = (e: FormEvent<HTMLFormElement>) => {
+    const handleVerifyEmail = async (e: FormEvent) => {
         e.preventDefault();
 
-        const payload = { email, verificationCode: verificationCode.join("") }
+        const token = verificationCode.join("");
+        if (token.length !== 6) {
+            toast.error("Please enter a valid 6-digit code", toastOptions);
+            return;
+        }
 
-        dispatch(verifyEmail(payload))
-            .unwrap()
-            .then((res: RegisterUserResponse) => {
-                console.log(res);
+        setLoading(true);
 
-                if (!res.status) {
-                    toast.error(res.message, toastOptions);
-                } else {
-                    toast.success(
-                        `${res.message}, You will be redirected in less than 3 seconds`,
-                        toastOptions
-                    );
-                    setTimeout(() => {
-                        navigate("/login")
-                    }, 3000);
-
-                }
-            })
-            .catch((err: any) => {
-                if (err.message) {
-                    toast.error(err.message, toastOptions);
-                } else {
-                    toast.error("Something went wrong", toastOptions);
-                }
+        try {
+            const response = await fetch(`https://admin.resilink.com.ng/api/verifyEmail/${token}`, {
+                method: "GET",
             });
-    };
-    return (
-        <>
-            <section className="w-full h-screen overflow-y-auto px-2 py-14 bg-dv">
-                <section className="w-full flex justify-center pt-5 md:pt-10 pb-5">
-                    <Logo color="black" />
-                </section>
-                <section className="w-full mb-7 flex-col justify-center items-center gap-1 inline-flex">
-                    <section className="text-center text-black text-[22px] font-semibold">
-                        Verify your Email
-                    </section>
-                    <section className="text-center text-neutral-800 text-opacity-80 text-sm font-normal">
-                        Enter the 6 digit code sent to your email address ({email})
-                    </section>
-                </section>
-                <section className="w-full flex justify-center items-center">
-                    <form className="w-full md:w-[400px]"
-                    // onSubmit={(e) => handleRegister(e)}
-                    >
-                        <section className="flex gap-2 mb-5">
-                            {verificationCode.map((value, index) => (
-                                <input
-                                    key={index}
-                                    ref={(el) => (inputRefs.current[index] = el)}
-                                    className="w-full bg-transparent py-3 px-2 rounded-md border text-center border-para text-para text-sm font-medium outline-none"
-                                    type="text"
-                                    value={value}
-                                    maxLength={1}
-                                    onChange={(e) => handleChange(index, e.target.value)}
-                                    onKeyDown={(e) => handleKeyDown(index, e)}
-                                />
-                            ))}
-                        </section>
-                        <section className="w-full justify-center flex mb-3">
-                            {loading ? (
-                                <section className="w-fit">
-                                    <ButtonBg
-                                        className="py-3 px-10 bg-bc"
-                                        disabled={
-                                            verificationCode.join("").trim().length !== 6
-                                        }
-                                    >
-                                        <RoundLoader />
-                                    </ButtonBg>
 
-                                </section>
-                            ) : (
-                                <section className="w-fit">
-                                    <ButtonBg
-                                        className="py-3 px-10 bg-bc"
-                                        onClick={handleVerifyEmail}
-                                        disabled={
-                                            verificationCode.join("").trim().length !== 6
-                                        }
-                                    >
-                                        Verify
-                                    </ButtonBg>
-                                </section>
-                            )}
-                        </section>
-                        <section className="flex justify-center items-center">
-                            <div className="text-center text-para text-[13px] font-normal leading-none">
-                                Code expired?
-                            </div>
-                            <div className="text-center text-bc pl-1 text-[13px] font-semibold">
-                                <Link to="#">Resend</Link>
-                            </div>
-                        </section>
-                    </form>
-                </section>
-            </section>
-        </>
+            const data = await response.json();
+
+            if (response.ok && data.status) {
+                const token = data.token;
+                rememberMe
+                    ? localStorage.setItem("authToken", token)
+                    : sessionStorage.setItem("authToken", token);
+
+                toast.success(`${data.message || "Email verified successfully!"}`, toastOptions);
+                setTimeout(() => {
+                    navigate("/dashboard");
+                }, 2000);
+            } else {
+                toast.error(data.message || "Invalid verification code.", toastOptions);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Something went wrong. Please try again.", toastOptions);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendCode = async () => {
+        if (!email) {
+            toast.error("Email not found. Please register again.", toastOptions);
+            return;
+        }
+
+        setResendLoading(true);
+        try {
+            const response = await fetch("https://admin.resilink.com.ng/api/resendcode", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.status) {
+                toast.success(data.message || "Verification code resent. Verification code not in mail inbox? Check your mail spam folder", toastOptions);
+            } else {
+                toast.error(data.message || "Unable to resend code", toastOptions);
+            }
+        } catch (error) {
+            toast.error("Something went wrong. Try again.", toastOptions);
+        } finally {
+            setResendLoading(false);
+        }
+    };
+
+    return (
+        <section className="w-full h-screen bg-[#f9fafb] flex flex-col items-center justify-center px-4">
+            {/* Logo */}
+            <div className="absolute top-6 left-6">
+                <Logo color="black" />
+            </div>
+
+            {/* Content Card */}
+            <div className="w-full max-w-md bg-white rounded-xl shadow-md px-6 py-10">
+                <h2 className="text-2xl font-bold text-center mb-2 text-gray-900">Verify your Email</h2>
+                <p className="text-sm text-center text-gray-600 mb-6">
+                    Enter the 6-digit code sent to <span className="font-medium">{email}</span>
+                </p>
+
+                {/* Verification Input */}
+                <form onSubmit={handleVerifyEmail} className="flex flex-col items-center">
+                    <div className="flex gap-3 mb-5">
+                        {verificationCode.map((value, index) => (
+                            <input
+                                key={index}
+                                ref={(el) => (inputRefs.current[index] = el)}
+                                type="text"
+                                value={value}
+                                onChange={(e) => handleChange(index, e.target.value)}
+                                onKeyDown={(e) => handleKeyDown(index, e)}
+                                maxLength={1}
+                                className="w-10 h-12 text-center border rounded-md border-gray-300 text-xl font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                            />
+                        ))}
+                    </div>
+
+                    <ButtonBg
+                        className="w-full py-3 rounded-lg text-white font-semibold bg-blue-600 hover:bg-blue-700 transition disabled:opacity-50"
+                        type="submit"
+                        disabled={verificationCode.join("").trim().length !== 6 || loading}
+                    >
+                        {loading ? <RoundLoader /> : "Verify"}
+                    </ButtonBg>
+
+                    <div className="mt-5 text-sm text-gray-500 flex items-center justify-center">
+                        Code expired?
+                        <button
+                            type="button"
+                            onClick={handleResendCode}
+                            disabled={resendLoading}
+                            className="ml-1 text-blue-600 font-semibold hover:underline transition-all disabled:opacity-50"
+                        >
+                            {resendLoading ? "Sending..." : "Resend"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
     );
 };
 

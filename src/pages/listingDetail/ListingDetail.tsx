@@ -1,186 +1,158 @@
-import React, { useEffect } from "react";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import {  MdOutlineBedroomParent } from "react-icons/md";
-import { BsFillStarFill, BsTelephone, BsWhatsapp } from "react-icons/bs";
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
-import { fetchListingDetails } from "../../features/auth-features/ListingSlice";
-import { RootState } from "../../types/Interface";
-import { ButtonBg } from "../../components/shared/buttons/Buttons";
+import { useParams } from "react-router-dom";
+import { BsFillStarFill } from "react-icons/bs";
+import { BASE_URLNew } from "../../utils/apiRoutes.tsx";
+import { useEffect, useState } from "react";
+import logo from "/src/assets/react.svg";
 
-const ListingDetail: React.FC = () => {
-  const location = useLocation();
-  const listingId = location.pathname.split("/")[3];
-  const dispatch = useDispatch();
+const ListingDetail = () => {
+  const { id } = useParams();
+  const [listing, setListing] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  // const formatPhoneNumber = (phone: any) => {
+  //   if (!phone) return '';
+  //   const digits = phone.replace(/\D/g, '');
+  //   return digits.startsWith('0') ? `234${digits.slice(1)}` : digits;
+  // };
 
   useEffect(() => {
-    dispatch(fetchListingDetails(listingId));
-  }, [dispatch, listingId]);
+    const fetchListing = async () => {
+      try {
+        const response = await fetch(`${BASE_URLNew}/api/propertyid/${id}`);
+        const data = await response.json();
+        const property = data?.data;
 
-  const { listing_details, listing_details_loading } = useSelector(
-    (state: RootState) => state.listing
-  );
-  console.log(listing_details_loading, listing_details);
+        let parsedImages: string[] = [];
+        try {
+          if (typeof property.images === "string") {
+            parsedImages = JSON.parse(property.images).map((img: string) =>
+                `${BASE_URLNew}/public${img.replace("https://admin.resilink.com.ng", "")}`
+            );
+          } else if (Array.isArray(property.images)) {
+            parsedImages = property.images.map((img: string) =>
+                `${BASE_URLNew}/public${img.replace("https://admin.resilink.com.ng", "")}`
+            );
+          }
+        } catch (error) {
+          console.error("Error parsing images:", error);
+        }
 
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    autoplay: true,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-  };
+        setListing({ ...property, images: parsedImages });
+        setSelectedImage(parsedImages[0]); // set first image by default
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching property:", error);
+        setLoading(false);
+      }
+    };
 
-  if (listing_details_loading) {
-    return <div className="spinner">Loading...</div>;
-  }
+    fetchListing();
+  }, [id]);
+
+  if (loading) return <div className="p-10 text-center">Loading...</div>;
+  if (!listing) return <div className="p-10 text-center">Property not found</div>;
 
   return (
-    <section className="w-full h-full overflow-y-scroll p-4 py-24">
-      <section className="mb-6 text-center">
-        <h2 className="text-3xl tracking-wide text-[#202224] font-bold">
-          Listing Details
-        </h2>
-      </section>
+      <div className="bg-gray-50 w-full h-full overflow-y-scroll p-4 pb-20">
+        <div className="max-w-4xl mx-auto">
 
-      <section className="w-full mb-6">
-        {/* <Slider {...settings}>
-          {listing_details.images.map((image, index) => (
-            <div className="w-full h-[400px]" key={index}>
-              <div
-                className="bg-cover bg-center h-full rounded-lg shadow-md"
-                style={{ backgroundImage: `url(${image})` }}
-              ></div>
-            </div>
-          ))}
-        </Slider> */}
-
-        <Slider {...settings}>
-          {listing_details.images.map((image, index) => (
-            <section className="w-full h-[400px]">
-              <section
-                className="bg-cover bg-no-repeat h-full object-center"
-                key={index}
-                style={{ backgroundImage: `url(${image})` }}
-              >
-                <section
-                  className="flex bg-cover bg-no-repeat h-full object-center flex-col md:px-14 px-2 py-28"
-                  style={{ backgroundImage: `url(${image})` }}
-                ></section>
-              </section>
-            </section>
-          ))}
-        </Slider>
-      </section>
-
-      <section className="p-6 bg-white shadow-lg rounded-lg mb-6">
-        <div className="flex flex-wrap justify-between items-center mb-4">
-          <div>
-            <h2 className="capitalize text-2xl font-semibold text-gray-900 mb-2">
-              {listing_details.title}
-            </h2>
-            <span className="inline-block py-1 px-3 text-white bg-bc rounded-md text-sm">
-              For {listing_details.type}
-            </span>
+          {/* Main Image */}
+          <div className="rounded-xl overflow-hidden shadow-lg">
+            <img
+                src={selectedImage || listing.images[0]}
+                alt="Main Property"
+                className="w-full h-[300px] sm:h-[400px] md:h-[450px] object-cover transition duration-300 ease-in-out"
+            />
           </div>
-          <div className="text-right">
-            <div className="flex gap-1 text-yellow-500 justify-end mb-1">
-              {[...Array(5)].map((_, idx) => (
-                <BsFillStarFill key={idx} />
-              ))}
-            </div>
-            <h2 className="text-2xl font-semibold text-gray-800 font-Kriss">
-              {new Intl.NumberFormat("en-US", { style: "currency", currency: "NGN" }).format(listing_details.price)}
 
-            </h2>
+          {/* Thumbnails */}
+          {listing.images.length > 1 && (
+              <div className="mt-4 grid grid-cols-5 gap-2 overflow-x-auto">
+                {listing.images.slice(0, 5).map((img: string, i: number) => (
+                    <div
+                        key={i}
+                        onClick={() => setSelectedImage(img)}
+                        className={`h-24 rounded-md overflow-hidden cursor-pointer border-2 ${selectedImage === img ? "border-[#0000A3]" : "border-transparent"}`}
+                    >
+                      <img src={img} alt={`Thumbnail ${i}`} className="w-full h-full object-cover hover:scale-105 transition" />
+                    </div>
+                ))}
+              </div>
+          )}
+
+          {/* Property Info */}
+          <div className="mt-6 bg-[#f9f9ff] p-6 rounded-xl shadow-sm">
+            <h1 className="text-3xl font-bold text-[#0000A3] mb-2">{listing.title}</h1>
+
+            <div className="mt-4 space-y-2 text-gray-800 text-[15px]">
+              <div className="flex items-start gap-2">
+                <span className="font-semibold w-[100px]">📍 Address:</span>
+                <span className="text-gray-700">{listing.address}</span>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <span className="font-semibold w-[100px]">🏷️ Designation:</span>
+                <span className="text-gray-700">For Rent</span>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <span className="font-semibold w-[100px]">💰 Price:</span>
+                <span className="text-gray-700">NGN {Number(listing.price).toLocaleString()}.00 /Yr</span>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <span className="font-semibold w-[100px]">🛏️ Rooms:</span>
+                <span className="text-gray-700">{listing.type || null}</span>
+              </div>
+
+              {/*<div className="flex items-start gap-2">*/}
+              {/*  <span className="font-semibold w-[100px]">🛋️ Parlour:</span>*/}
+              {/*  <span className="text-gray-700">1</span>*/}
+              {/*</div>*/}
+
+              {/*<div className="flex items-start gap-2">*/}
+              {/*  <span className="font-semibold w-[100px]">🍽️ Kitchen:</span>*/}
+              {/*  <span className="text-gray-700">{listing.kitchen || 1}</span>*/}
+              {/*</div>*/}
+            </div>
+          </div>
+
+          {/* Agent Card */}
+          <div className="mt-8 bg-[#f4f6ff] rounded-xl p-5 flex flex-col sm:flex-row justify-between items-center">
+            <div className="flex items-center gap-4">
+              <img
+                  src={logo}
+                  alt="Agent"
+                  className="w-14 h-14 rounded-full object-cover border-2 border-white"
+              />
+              <div>
+                <h3 className="text-md font-semibold text-gray-800">{listing.posted_by.name}</h3>
+                <p className="text-sm text-gray-600">{listing.posted_by.type}</p>
+                <div className="flex items-center text-yellow-500 text-sm mt-1">
+                  <BsFillStarFill />
+                  <span className="ml-1">4.5</span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 sm:mt-0 text-gray-600 text-sm">{listing.created_at}</div>
+          </div>
+
+          {/* Contact Button */}
+          <div className="mt-6 flex justify-center">
+            <a
+                href={`https://wa.link/wrv6d0`}
+                // href={`https://wa.me/${formatPhoneNumber(listing.posted_by.phone)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+              <button className="bg-[#0000A3] hover:bg-blue-900 text-white font-semibold px-8 py-3 rounded-md transition">
+                Contact Now
+              </button>
+            </a>
           </div>
         </div>
-        <p className="text-gray-600 mb-4">{listing_details.location.address}</p>
-        <ul className="flex flex-wrap gap-4 text-gray-700">
-          <li className="flex items-center gap-2">
-            <MdOutlineBedroomParent className="text-lg" />
-            <span>{listing_details.rooms} Rooms</span>
-          </li>
-          {/*<li className="flex items-center gap-2">*/}
-          {/*  <MdOutlineBathroom className="text-lg" />*/}
-          {/*  <span>4 Bedrooms</span>*/}
-          {/*</li>*/}
-        </ul>
-      </section>
-
-      <section className="p-6 bg-white shadow-lg rounded-lg mb-6">
-        <h4 className="text-xl font-semibold text-gray-800 mb-4">
-          Property Details
-        </h4>
-        <div className="grid md:grid-cols-3 gap-6">
-          <ul className="space-y-2">
-            <li>
-              <span className="font-medium">Property Type:</span> Rent
-            </li>
-            <li>
-              <span className="font-medium">Property ID:</span>{" "}
-              {listing_details._id}
-            </li>
-            <li>
-              <span className="font-medium">Property Status:</span> For{" "}
-              {listing_details.status}
-            </li>
-            <li>
-              <span className="font-medium">Operating Since:</span>{" "}
-              {new Date(listing_details.createdAt).toDateString()}
-            </li>
-          </ul>
-          <ul className="space-y-2">
-            <li>
-              <span className="font-medium">Price:</span> ₦
-              {listing_details.price}
-            </li>
-            <li>
-              <span className="font-medium">Property Size:</span> NaN
-            </li>
-            <li>
-              <span className="font-medium">City:</span> Benin
-            </li>
-          </ul>
-          {/* <ul className="space-y-2">
-            <li>
-              <span className="font-medium">Rooms:</span> 7
-            </li>
-            <li>
-              <span className="font-medium">Bedrooms:</span> 3
-            </li>
-            <li>
-              <span className="font-medium">Bathrooms:</span> 4
-            </li>
-          </ul> */}
-        </div>
-      </section>
-
-      <section className="p-6 bg-white shadow-lg rounded-lg mb-6">
-        <h4 className="text-xl font-semibold text-gray-800 mb-4">
-          Brief Description
-        </h4>
-        <p className="text-gray-700 mb-4">{listing_details.description}</p>
-
-        <h4 className="text-xl font-semibold text-gray-800 mb-4">
-          Contact Agent
-        </h4>
-        <div className="flex flex-wrap gap-4">
-          <a href={`tel:+2348032926144`} className="w-full sm:w-auto">
-            <ButtonBg className="bg-bc text-white py-2 px-4 flex gap-2 items-center w-full sm:w-auto rounded-md shadow-md">
-              Call <BsTelephone />
-            </ButtonBg>
-          </a>
-          <a href={`https://wa.link/fynvpj`} className="w-full sm:w-auto">
-            <ButtonBg className="bg-green-500 text-white py-2 px-4 flex gap-2 items-center w-full sm:w-auto rounded-md shadow-md">
-              Whatsapp <BsWhatsapp />
-            </ButtonBg>
-          </a>
-        </div>
-      </section>
-    </section>
+      </div>
   );
 };
 

@@ -1,10 +1,6 @@
-const RoundLoader = () => {
-  return (
-    <section title="Loading" className="flex justify-center">
-      <section className="loader w-6 h-6 border-t-4 border-r-4 border-white border-solid rounded-full animate-spin"></section>
-    </section>
-  );
-};
-
+// RoundLoader.tsx
+const RoundLoader = () => (
+    <div className="w-5 h-5 border-2 border-t-2 border-gray-300 border-t-blue-500 rounded-full animate-spin mx-auto" />
+);
 
 export default RoundLoader;

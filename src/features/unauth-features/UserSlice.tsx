@@ -2,7 +2,7 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { unauth_api } from "../../services/unauth_services/axiosInstance";
-import { BASE_URL } from "../../utils/apiRoutes";
+import {BASE_URL, BASE_URLNew} from "../../utils/apiRoutes";
 import { RegisterUserPayload, RegisterUserResponse, RootState } from "../../types/Interface";
 
 // Define the async thunk for user registration
@@ -43,7 +43,7 @@ export const loginUser: any = createAsyncThunk<
   "user/login",
   async (payload: RegisterUserPayload) => {
     try {
-      const response = await unauth_api.post(`${BASE_URL}/v1/agent/auth/login`, payload);
+      const response = await unauth_api.post(`${BASE_URLNew}/api/login`, payload);
       return response.data;
     } catch (error: any) {
       throw error.response?.data?.error || 'Login failed';

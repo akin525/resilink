@@ -10,7 +10,7 @@ export const CustomInput: React.FC<InputProps> = ({
     return (
         <section className="w-full mb-3">
             {label && (
-                <label className="text-sm font-semibold text-[#202224] block mb-1">
+                <label className="text-sm text-black font-semibold  block mb-1">
                     {label}
                 </label>
             )}

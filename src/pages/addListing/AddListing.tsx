@@ -4,16 +4,18 @@ import { CustomUpload } from '../../components/common/inputs/CustomUpload';
 import { CustomTextArea } from '../../components/common/inputs/CustomTextArea';
 import { ButtonBg } from '../../components/shared/buttons/Buttons';
 import { CustomSelect } from '../../components/common/inputs/CustomSelect';
-import { useDispatch } from 'react-redux';
-// import { useNavigate } from 'react-router-dom';
 import { toastOptions } from '../../utils/helpers';
 import { toast } from 'react-toastify';
-import { addListing } from '../../features/auth-features/ListingSlice';
+import { BASE_URLNew } from "../../utils/apiRoutes.tsx";
+import { getAuthToken } from "../../utils/auth.tsx";
+import {useUser} from "../../context/UserContext.tsx";
 
 const AddListing: React.FC = () => {
     const [loading, setLoading] = useState(false);
     // const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const { user } = useUser();
+
+
     const [data, setData] = useState({
         title: "",
         type: "SINGLE_ROOM",
@@ -21,6 +23,7 @@ const AddListing: React.FC = () => {
         price: 0,
         rooms: 1,
         address: "",
+        posted_by:user?.id,
         city: "",
         state: "",
         country: "",
@@ -30,14 +33,16 @@ const AddListing: React.FC = () => {
 
     interface ImagePreview {
         preview: string;
-        data: File
+        data: File;
     }
     const [images, setImages] = useState<ImagePreview[]>([]);
     const inputRef: any = useRef(null);
+
     const handleClick = () => {
         inputRef.current.click();
     };
-    const [editingIndex, setEditingIndex] = useState<number | null>(null)
+
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
     const handleEdit = (index: number) => {
         setEditingIndex(index);
@@ -46,6 +51,7 @@ const AddListing: React.FC = () => {
     const handleRemove = (index: number) => {
         setImages((prev) => prev.filter((_, i) => i !== index));
     };
+
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (files) {
@@ -68,54 +74,75 @@ const AddListing: React.FC = () => {
             }
         }
     };
+
+    const timeout = (ms: any) => new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), ms));
+
+    const fetchWithTimeout = async (url: any, options: any, timeoutMs: any) => {
+            const response = await Promise.race([
+                fetch(url, options),
+                timeout(timeoutMs),
+            ]);
+            return response;
+        
+    };
+
     const handleSubmit = async (event: any) => {
         event.preventDefault();
 
-        setLoading(true);
-        if (images) {
-            console.log(images);
 
-            let formData = new FormData();
+        setLoading(true);
+        if (images.length > 0) {
+            const formData = new FormData();
             formData.append("title", data.title);
             formData.append("type", data.type);
             formData.append("mode", data.mode);
+            formData.append("status", "ACTIVE"); // As per API, status is "ACTIVE"
             formData.append("price", data.price.toString());
+            formData.append("commission", "1000"); // Assuming fixed commission
+            formData.append("total_price", (data.price + 1000).toString()); // Assuming commission is added to price
             formData.append("rooms", data.rooms.toString());
-            formData.append("location[address]", data.address);
-            formData.append("location[city]", data.city);
-            formData.append("location[state]", data.state);
-            formData.append("location[country]", data.country);
+            formData.append("address", data.address);
+            formData.append("state", data.state);
+            formData.append("country", data.country);
             formData.append("description", data.description);
-            images.forEach(img => formData.append('images', img.data));
-            const payload = formData;
-            console.log(payload);
+            formData.append("posted_by", String(data.posted_by ?? ""));
+            formData.append("property_id", "1");
+            formData.append("city", data.city);
+            formData.append("video", ""); // Assuming no video
 
-            dispatch(addListing(payload))
-                .unwrap()
-                .then((res: any) => {
-                    console.log(res);
-                    setLoading(false);
-                    if (res.status === false) {
-                        toast.error(res.message, toastOptions);
-                        setLoading(false);
-                    }
-                    if (res.status === true) {
-                        toast.success(res.message, toastOptions);
-                        setTimeout(() => {
-                            window.location.pathname = "/dashboard";
-                        }, 3000);
-                        setLoading(false);
-                    }
-                })
-                .catch((err: any) => {
-                    console.log(err);
-                    setLoading(false);
-                    toast.error("Something went wrong", toastOptions);
-                    toast.error(
-                        "Try to check if your connection is stable",
-                        toastOptions
-                    );
-                });
+            // Add images to FormData
+            images.forEach(img => formData.append('images[]', img.data)); // API expects 'images' as an array
+
+            const token = getAuthToken();
+
+            try {
+                const res = await fetchWithTimeout(`${BASE_URLNew}/api/createproperty`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: formData,
+                }, 10000)as Response;
+
+                const result = await res.json();
+
+                console.log(result);
+                setLoading(false);
+                if (result.status === "false") {
+                    toast.error(result.message, toastOptions);
+                }
+                if (result.status === "true") {
+                    toast.success(result.message, toastOptions);
+                    setTimeout(() => {
+                        window.location.pathname = "/dashboard"; // Redirect to dashboard
+                    }, 3000);
+                }
+            } catch (error) {
+                setLoading(false);
+                console.log(error);
+                // toast.error(error, toastOptions);
+                toast.error("Try to check if your connection is stable", toastOptions);
+            }
         } else {
             toast.error("Image upload failed", toastOptions);
         }
@@ -170,114 +197,106 @@ const AddListing: React.FC = () => {
                     </button>
                 </div>
             </div>
-
-            {/* Main Grid */}
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left: Upload Box */}
-                <div className="bg-white rounded-xl p-6 shadow-sm">
-                    <h3 className="text-sm font-semibold mb-2 text-[#202224]">
-                        Upload your property image here. Please click Upload Image button
-                    </h3>
-                    <p className="text-xs text-gray-500 mb-4">
-                        Supports .JPG, .PNG, .PDF, or .MP4. Max file size: 10MB
-                    </p>
-                    <CustomUpload
-                        label={"Upload Image"}
-                        images={images}
-                        handleClick={handleClick}
-                        handleFileChange={handleFileChange}
-                        inputRef={inputRef}
-                        handleEdit={handleEdit}
-                        handleRemove={handleRemove}
-                    />
-                </div>
-
-                {/* Right: Form Box */}
-                <div className="bg-white rounded-xl p-6 shadow-sm space-y-4">
-                    <CustomInput
-                        label={"Title:"}
-                        type={"text"}
-                        name={"title"}
-                        placeholder={"Property Title"}
-                        handleChange={handleChange}
-                    />
-                    <div className="grid grid-cols-2 gap-3">
-                        <CustomSelect
-                            label={"Type:"}
-                            options={listingTypes}
-                            name={"type"}
-                            handleChange={handleChange}
-                        />
-                        <CustomSelect
-                            label={"Mode:"}
-                            options={listingMode}
-                            name={"mode"}
-                            handleChange={handleChange}
+            <form onSubmit={handleSubmit}>
+                {/* Main Grid */}
+                <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left: Upload Box */}
+                    <div className="bg-white rounded-xl p-6 shadow-sm">
+                        <h3 className="text-sm font-semibold mb-2 text-[#202224]">
+                            Upload your property image here. Please click Upload Image button
+                        </h3>
+                        <p className="text-xs text-gray-500 mb-4">
+                            Supports .JPG, .PNG, .PDF, or .MP4. Max file size: 10MB
+                        </p>
+                        <CustomUpload
+                            label={"Upload Image"}
+                            images={images}
+                            handleClick={handleClick}
+                            handleFileChange={handleFileChange}
+                            inputRef={inputRef}
+                            handleEdit={handleEdit}
+                            handleRemove={handleRemove}
                         />
                     </div>
-                    <CustomInput
-                        label={"Price:"}
-                        type={"number"}
-                        name={"price"}
-                        placeholder={"₦0.00"}
-                        handleChange={handleChange}
-                    />
-                    <div className="grid grid-cols-2 gap-3">
+
+                    {/* Right: Form Box */}
+                    <div className="bg-white rounded-xl p-6 shadow-sm space-y-4">
                         <CustomInput
-                            label={"Commission:"}
+                            label={"Title:"}
+                            type={"text"}
+                            name={"title"}
+                            placeholder={"Property Title"}
+                            handleChange={handleChange}
+                        />
+                        <div className="grid grid-cols-2 gap-3">
+                            <CustomSelect
+                                label={"Type:"}
+                                options={listingTypes}
+                                name={"type"}
+                                handleChange={handleChange}
+                            />
+                            <CustomSelect
+                                label={"Mode:"}
+                                options={listingMode}
+                                name={"mode"}
+                                handleChange={handleChange}
+                            />
+                        </div>
+                        <CustomInput
+                            label={"Price:"}
                             type={"number"}
-                            name={"commission"}
+                            name={"price"}
                             placeholder={"₦0.00"}
                             handleChange={handleChange}
                         />
-                        <CustomSelect
-                            label={"State:"}
-                            options={[
-                                {text: "Edo", value: "EDO"},
-                                {text: "Lagos", value: "LAGOS"},
-                            ]}
-                            name={"state"}
-                            handleChange={handleChange}
-                        />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-3">
+                            <CustomInput
+                                label={"Commission:"}
+                                type={"number"}
+                                name={"commission"}
+                                placeholder={"₦0.00"}
+                                handleChange={handleChange}
+                            />
+                            <CustomSelect
+                                label={"State:"}
+                                options={[{text: "Edo", value: "EDO"}, {text: "Lagos", value: "LAGOS"}]}
+                                name={"state"}
+                                handleChange={handleChange}
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <CustomInput
+                                label={"Rooms:"}
+                                type={"number"}
+                                name={"rooms"}
+                                placeholder={"0"}
+                                handleChange={handleChange}
+                            />
+                        </div>
                         <CustomInput
-                            label={"Rooms:"}
-                            type={"number"}
-                            name={"rooms"}
-                            placeholder={"0"}
+                            label={"Address:"}
+                            type={"text"}
+                            name={"address"}
+                            placeholder={"Property Address"}
                             handleChange={handleChange}
                         />
-                        <CustomInput
-                            label={"No of rooms:"}
-                            type={"number"}
-                            name={"rooms"}
-                            placeholder={"0"}
+                        <CustomTextArea
+                            label={"Description:"}
+                            name={"description"}
+                            rows={4}
+                            placeholder={"Write a short description..."}
                             handleChange={handleChange}
                         />
+                        <ButtonBg
+                            type="submit"
+                            className="bg-[#0000C8] text-white w-full py-3 mt-2 rounded-xl font-semibold text-sm">
+                            {loading ? "Submitting..." : "Add Property"}
+                        </ButtonBg>
                     </div>
-                    <CustomInput
-                        label={"Address:"}
-                        type={"text"}
-                        name={"address"}
-                        placeholder={"Property Address"}
-                        handleChange={handleChange}
-                    />
-                    <CustomTextArea
-                        label={"Description:"}
-                        name={"description"}
-                        rows={4}
-                        placeholder={"Write a short description..."}
-                        handleChange={handleChange}
-                    />
-                    <ButtonBg className="bg-[#0000C8] text-white w-full py-3 mt-2 rounded-xl font-semibold text-sm">
-                        {loading ? "Submitting..." : "Add Property"}
-                    </ButtonBg>
-                </div>
-            </section>
+                </section>
+            </form>
         </section>
-
-    )
+);
 }
 
-export default AddListing
+export default AddListing;

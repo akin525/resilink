@@ -1,37 +1,52 @@
 import React, { useEffect, useState } from 'react'
 import { BsBellFill, BsList } from 'react-icons/bs'
-// import { LuChevronDownCircle } from 'react-icons/lu'
 import { toggleTopnav } from '../../../features/unauth-features/ActionSlice';
-import { Link } from 'react-router-dom';
-import { RootState } from '../../../types/Interface';
 import { useDispatch, useSelector } from 'react-redux';
-import Logo from '../../common/logo/Logo';
+import { RootState } from '../../../types/Interface';
 import { GoGear } from 'react-icons/go';
 import { IoIosPeople } from 'react-icons/io';
 import { HiOutlineLogout } from 'react-icons/hi';
-import { TbDeviceAnalytics } from 'react-icons/tb';
 import { HiMiniQueueList } from 'react-icons/hi2';
 import { CiGrid42 } from 'react-icons/ci';
 import { CgArrowLongLeft } from 'react-icons/cg';
+import { useUser } from '../../../../src/context/UserContext.tsx';
+import Logo from '../../common/logo/Logo';
+import logo from "/src/assets/react.svg"
+import Loader from '../../common/Loader';
+import { useNavigate } from 'react-router-dom';
 
 const TopNav: React.FC = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { topnav } = useSelector((state: RootState) => state.action);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+    const [loading, setLoading] = useState(false);
+    const { user } = useUser();
     const { data, uLoading } = useSelector((state: RootState) => state.account);
+
     const onToggle = () => {
         dispatch(toggleTopnav(!topnav));
         setIsSidebarOpen(!isSidebarOpen);
     };
+
     useEffect(() => {
-        if (isSidebarOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "auto";
-        }
+        document.body.style.overflow = isSidebarOpen ? 'hidden' : 'auto';
     }, [isSidebarOpen]);
+
+    const handleNavClick = (link: string) => {
+        setLoading(true);
+        setTimeout(() => {
+            navigate(link);
+            setLoading(false);
+        }, 500);
+    };
+
     const links = [
+        {
+            icon: <CiGrid42 size={20} />,
+            label: "Homepage",
+            link: "/",
+        },
         {
             icon: <CiGrid42 />,
             label: "Dashboard",
@@ -42,17 +57,16 @@ const TopNav: React.FC = () => {
             label: "Listings",
             link: "/dashboard/listings",
         },
-        {
-            icon: <TbDeviceAnalytics />,
-            label: "Analytics",
-            link: "/dashboard/analytics",
-        },
-        {
-            icon: <IoIosPeople />,
-            label: "Tenants",
-            link: "/dashboard/tenants",
-        },
-    ]
+    ];
+
+    if (user?.type === "agent" || user?.type === "admin") {
+        links.push({
+            icon: <IoIosPeople size={20} />,
+            label: "Add Properties",
+            link: "/dashboard/listings/add",
+        });
+    }
+
     const links2 = [
         {
             icon: <GoGear />,
@@ -64,7 +78,8 @@ const TopNav: React.FC = () => {
             label: "Logout",
             link: "/",
         },
-    ]
+    ];
+
     return (
         <section className="py-3 px-4 shadow-2xl w-full bg-white">
             <section className="flex items-center justify-between">
@@ -74,7 +89,7 @@ const TopNav: React.FC = () => {
                 />
 
                 <section className="flex items-center gap-5">
-                    <BsBellFill className="text-2xl"/>
+                    <BsBellFill className="text-2xl" />
                     {uLoading ? (
                         <section className="animate-pulse w-32">
                             <section className="flex w-full items-center cursor-pointer">
@@ -87,12 +102,10 @@ const TopNav: React.FC = () => {
                         </section>
                     ) : (
                         <section className="flex items-center gap-3 cursor-pointer">
-                            <img className="w-12 h-12 rounded-full object-cover" src={data?.profilePic} alt="profile"/>
+                            <img className="w-12 h-12 rounded-full object-cover" src={logo} alt="profile" />
                             <section className="flex flex-col">
-                <span className="font-bold">
-                  {data?.firstName} {data?.lastName}
-                </span>
-                                <span className="text-sm">Agent</span>
+                                <span className="font-bold">{user?.name}</span>
+                                <span className="text-sm">{user?.type}</span>
                             </section>
                         </section>
                     )}
@@ -106,25 +119,28 @@ const TopNav: React.FC = () => {
                 }`}
             >
                 <section className="h-full w-full flex flex-col items-center gap-y-10 py-[26px]">
-                    {/* Top: Back + Logo */}
                     <section className="flex flex-col items-center gap-5 w-full">
                         <CgArrowLongLeft
                             onClick={onToggle}
                             className="text-2xl self-start ml-4 cursor-pointer"
                         />
-                        <Logo color="white"/>
+                        <div onClick={() => {
+                            handleNavClick('/');
+                            onToggle();
+                        }} className="cursor-pointer">
+                            <Logo color="white"/>
+                        </div>
                     </section>
 
-                    {/* Profile */}
+
                     {!uLoading && (
                         <section className="flex flex-col items-center gap-2 mt-4">
                             <img
-                                src={data?.profilePic}
-                                alt="Profile"
+                                src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=Brown&facialHairType=BeardMedium&clotheType=Hoodie&clotheColor=Blue03&eyeType=Happy&eyebrowType=Default&mouthType=Smile&skinColor=Light"
                                 className="w-20 h-20 rounded-full object-cover border-4 border-white"
                             />
-                            <p className="font-semibold">{data?.firstName} {data?.lastName}</p>
-                            <span className="text-sm text-gray-200">Agent</span>
+                            <p className="font-semibold">{data?.name}</p>
+                            <span className="text-sm text-gray-200">{data?.type}</span>
                         </section>
                     )}
 
@@ -133,13 +149,15 @@ const TopNav: React.FC = () => {
                         <ul className="flex flex-col gap-6">
                             {links.map((item, i) => (
                                 <li key={i}>
-                                    <Link
+                                    <button
                                         className="flex items-center gap-2 text-base hover:text-[#ffffffcc]"
-                                        to={item.link}
-                                        onClick={onToggle}
+                                        onClick={() => {
+                                            handleNavClick(item.link);
+                                            onToggle();
+                                        }}
                                     >
                                         {item.icon} {item.label}
-                                    </Link>
+                                    </button>
                                 </li>
                             ))}
                         </ul>
@@ -147,21 +165,26 @@ const TopNav: React.FC = () => {
                         <ul className="flex flex-col gap-6 mt-10">
                             {links2.map((item, i) => (
                                 <li key={i}>
-                                    <Link
+                                    <button
                                         className="flex items-center gap-2 text-base hover:text-[#ffffffcc]"
-                                        to={item.link}
-                                        onClick={onToggle}
+                                        onClick={() => {
+                                            handleNavClick(item.link);
+                                            onToggle();
+                                        }}
                                     >
                                         {item.icon} {item.label}
-                                    </Link>
+                                    </button>
                                 </li>
                             ))}
                         </ul>
                     </section>
                 </section>
             </section>
-        </section>
-    )
-}
 
-export default TopNav
+            {/* Loader */}
+            {loading && <Loader/>}
+        </section>
+    );
+};
+
+export default TopNav;

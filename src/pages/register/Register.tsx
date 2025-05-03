@@ -1,183 +1,204 @@
-// import { Logo } from "../../components/shared/logo/Logo";
-import { useDispatch, useSelector } from "react-redux";
-import { CustomInput } from "../../components/common/inputs/CustomInput";
+import { useState, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import Logo from "../../components/common/logo/Logo";
 import { ButtonBg } from "../../components/shared/buttons/Buttons";
-// import { useDispatch, useSelector } from "react-redux";
-import { FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { HandleChangeData, RegisterUserData, RegisterUserResponse, RootState } from "../../types/Interface";
-import { registerUser } from "../../features/unauth-features/UserSlice";
-import { toastOptions } from "../../utils/helpers";
-import { toast } from "react-toastify";
 import RoundLoader from "../../components/shared/loaders/RoundLoader";
-// import RoundLoader from "../../components/shared/loaders/RoundLoader";
-// import { BASE_URL } from "../../utils/constants";
+import { toastOptions } from "../../utils/helpers";
+import { Eye, EyeOff } from "lucide-react"; // install lucide-react if not already
 
 const Register = () => {
-  const dispatch = useDispatch();
-  const { loading } = useSelector((state: RootState) => state.user);
-  const navigate = useNavigate()
-  const [formData, setFormData] = useState<RegisterUserData>({
-    firstName: "",
-    lastName: "",
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    username: "",
+    phone: "",
     email: "",
     password: "",
+    password_confirmation: "",
+    type: "user",
   });
 
-  const handleChange = (e: HandleChangeData) => {
+  const handleChange = (
+      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleRegister = (e: FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
 
-    const payload = formData;
-
-    dispatch(registerUser(payload))
-      .unwrap()
-      .then((res: RegisterUserResponse) => {
-        console.log(res);
-
-        if (!res.status) {
-          toast.error(res.message, toastOptions);
-        } else {
-          toast.success(
-            `${res.message}, Please proceed to verify your email`,
-            toastOptions
-          );
-          localStorage.setItem("userEmail", payload.email)
-          setTimeout(() => {
-            navigate("/verify-email")
-          }, 3000);
-        }
-      })
-      .catch((err: any) => {
-        if (err.message) {
-          toast.error(err.message, toastOptions);
-        } else {
-          toast.error("Something went wrong", toastOptions);
-        }
+    try {
+      const response = await fetch("https://admin.resilink.com.ng/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
+
+      const res = await response.json();
+
+      if (!response.ok) {
+        if (res.errors && typeof res.errors === "object") {
+          Object.values(res.errors).forEach((messages: any) => {
+            if (Array.isArray(messages)) {
+              messages.forEach((msg: string) => {
+                toast.error(msg, toastOptions);
+              });
+            }
+          });
+        } else {
+          toast.error(res.message || "Registration failed", toastOptions);
+        }
+      } else {
+        toast.success(
+            `${res.message || "Registration successful"}, Please verify code have been send to your email. Verification code not in mail inbox? 
+            Check your mail spam folder`,
+            toastOptions
+        );
+        localStorage.setItem("userEmail", formData.email);
+        setTimeout(() => navigate("/verify-email"), 3000);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong", toastOptions);
+    } finally {
+      setLoading(false);
+    }
   };
+
   return (
-    <>
-      <section className=" bg-[#0000cc] w-full h-screen overflow-y-auto px-2 py-14 ">
-        <section className="w-full flex justify-center pt-5 md:pt-10 pb-5">
-          <div className="absolute top-5 left-5">
-            <Logo color="white"/>
-          </div>
-        </section>
-        <section className="w-full mb-7 flex-col justify-center items-center gap-1 inline-flex">
-          <section className="text-center text-white text-[22px] font-semibold">
-            Create an Account
-          </section>
-          <section className="text-center text-white text-neutral-800 text-opacity-80 text-sm font-normal">
+      <section className="bg-[#0000cc] w-full min-h-screen flex justify-center items-center relative px-4">
+        <div className="absolute top-6 left-6">
+          <Logo color="white" />
+        </div>
+
+        <div className="bg-white w-full max-w-md px-6 py-10 rounded-3xl shadow-xl">
+          <h2 className="text-center text-2xl font-bold text-[#0000cc]">Create an Account</h2>
+          <p className="text-center text-sm text-gray-500 mb-6">
             Sign up now to get started with an account.
-          </section>
-        </section>
-        {/* <section className="w-full mb-5 flex justify-center">
-          <section
-            // onClick={handleGoogleLogin}
-            className="w-[335px] cursor-pointer h-14 px-3.5 py-2 rounded border border-para justify-center items-center gap-5 inline-flex"
-          >
-            <img className="w-[19px] h-[19px]" src={GoogleLogo} />
-            <section className="text-center text-white text-opacity-95 text-base font-semibold">
-              Continue with Google
-            </section>
-          </section>
-        </section> */}
-        <section className="w-full flex justify-center items-center">
-          <form className="w-full md:w-[700px]"
-          // onSubmit={(e) => handleRegister(e)}
-          >
-            <section className="w-full md:flex md:gap-5">
-              <CustomInput
-                handleChange={handleChange}
-                label={"First Name"}
-                type={"text"}
-                name={"firstName"}
-                placeholder={"John"}
+          </p>
+
+          <form onSubmit={handleRegister} className="space-y-4">
+            {/* Name */}
+            <Input icon="👤" name="name" value={formData.name} onChange={handleChange} placeholder="Full Name" />
+            {/* Username */}
+            <Input icon="@" name="username" value={formData.username} onChange={handleChange} placeholder="Username" />
+            <Input icon="#" name="phone" value={formData.phone} onChange={handleChange} placeholder="Phone Number" />
+            {/* Email */}
+            <Input icon="📧" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Email" />
+
+            {/* Password */}
+            <div className="flex items-center bg-gray-100 rounded-full px-4">
+              <span className="text-gray-500 text-sm mr-2">🔒</span>
+              <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Password"
+                  className="flex-1 h-10 bg-transparent text-sm focus:outline-none"
               />
-              <CustomInput
-                handleChange={handleChange}
-                label={"Last Name"}
-                type={"text"}
-                name={"lastName"}
-                placeholder={"Doe"}
+              <span
+                  className="cursor-pointer text-gray-500"
+                  onClick={() => setShowPassword((prev) => !prev)}
+              >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </span>
+            </div>
+
+            {/* Confirm Password */}
+            <div className="flex items-center bg-gray-100 rounded-full px-4">
+              <span className="text-gray-500 text-sm mr-2">🔒</span>
+              <input
+                  type={showConfirm ? "text" : "password"}
+                  name="password_confirmation"
+                  value={formData.password_confirmation}
+                  onChange={handleChange}
+                  placeholder="Confirm Password"
+                  className="flex-1 h-10 bg-transparent text-sm focus:outline-none"
               />
-            </section>
-            <CustomInput
-              handleChange={handleChange}
-              label={"Email Address"}
-              type={"email"}
-              name={"email"}
-              placeholder={"johndoe@gmail.com"}
-            />
-            <CustomInput
-              handleChange={handleChange}
-              label={"Password"}
-              type={"password"}
-              name={"password"}
-              placeholder={"Password"}
-            />
-            <section className="flex items-center mb-3">
-              <input type="checkbox" className="bg-transparent outline-none" />
-              <section className="pl-2">
-                <span className=" text-xs font-medium text-white">
-                  I have read and agree to the
-                </span>
-                <span className="text-white text-xs font-medium underline pl-1 cursor-pointer">
-                  Terms of Service
-                </span>
-              </section>
-            </section>
-            <section className="w-full justify-center flex mb-3">
-              {loading ? (
-                <section className="w-fit">
-                  <ButtonBg
-                    className="py-3 px-10 bg-bc"
-                    disabled={
-                      formData.firstName.trim() === "" ||
-                      formData.lastName.trim() === "" ||
-                      formData.email.trim() === "" ||
-                      formData.password.trim() === ""
-                    }
-                  >
-                    <RoundLoader />
-                  </ButtonBg>
-                </section>
-              ) : (
-                <section className="w-fit">
-                  <ButtonBg
-                    className="py-3 px-10 bg-white"
-                    onClick={handleRegister}
-                    disabled={
-                      formData.firstName.trim() === "" ||
-                      formData.lastName.trim() === "" ||
-                      formData.email.trim() === "" ||
-                      formData.password.trim() === ""
-                    }
-                  >
-                    Sign Up
-                  </ButtonBg>
-                </section>
-              )}
-            </section>
-            <section className="flex justify-center items-center">
-              <div className="text-center text-white text-[13px] font-normal leading-none">
-                Already have an account?
-              </div>
-              <div className="text-center text-white pl-1 text-[13px] font-semibold">
-                <Link to="/login">Log in</Link>
-              </div>
-            </section>
+              <span
+                  className="cursor-pointer text-gray-500"
+                  onClick={() => setShowConfirm((prev) => !prev)}
+              >
+              {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+            </span>
+            </div>
+
+            {/* Type */}
+            <select
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                className="w-full rounded-full px-4 py-2 bg-gray-100 text-sm text-black focus:outline-none"
+            >
+              <option value="user">User</option>
+              <option value="agent">Agent</option>
+            </select>
+
+            {/* Terms */}
+            <div className="flex items-center text-sm">
+              <input type="checkbox" className="mr-2" />
+              <span>
+              I agree to the{" "}
+                <span className="underline cursor-pointer">Terms of Service</span>
+            </span>
+            </div>
+
+            {/* Submit */}
+            <ButtonBg
+                className="w-full h-10 text-white font-semibold rounded-full border border-[#0000cc] bg-[#0000cc] hover:bg-white hover:text-[#0000cc] transition"
+                type="submit"
+                disabled={
+                    !formData.name || !formData.username || !formData.email ||
+                    !formData.password || !formData.password_confirmation
+                }
+            >
+              {loading ? <RoundLoader /> : "Sign Up"}
+            </ButtonBg>
+
+            <p className="text-center text-sm mt-4">
+              Already have an account?{" "}
+              <a href="/login" className="font-semibold underline text-[#0000cc]">Log in</a>
+            </p>
           </form>
-        </section>
+        </div>
       </section>
-    </>
   );
 };
+
+// Reusable Input component
+const Input = ({
+                 icon,
+                 name,
+                 value,
+                 onChange,
+                 placeholder,
+                 type = "text",
+               }: {
+  icon: string;
+  name: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder: string;
+  type?: string;
+}) => (
+    <div className="flex items-center bg-gray-100 rounded-full px-4">
+      <span className="text-gray-500 text-sm mr-2">{icon}</span>
+      <input
+          type={type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          className="flex-1 h-10 bg-transparent text-sm focus:outline-none"
+      />
+    </div>
+);
 
 export default Register;

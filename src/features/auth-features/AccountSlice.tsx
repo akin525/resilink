@@ -2,16 +2,16 @@
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { auth_api } from "../../services/auth_services/axiosInstance";
-import { BASE_URL } from "../../utils/apiRoutes";
 import { toast } from "react-toastify";
 import { toastOptions } from "../../utils/helpers";
+import {BASE_URLNew} from "../../utils/apiRoutes.tsx";
 
 // Define the async thunk for user registration
 export const getUserProfile: any = createAsyncThunk(
   "user/register",
   async () => {
     try {
-      const response = await auth_api.get(`${BASE_URL}/v1/agent/account/profile`);
+      const response = await auth_api.get(`${BASE_URLNew}/api/profile`);
       return response.data;
     } catch (error: any) {
       throw error.response?.data?.error || 'Profile get failed';
