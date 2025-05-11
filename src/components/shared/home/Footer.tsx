@@ -1,5 +1,5 @@
 import Logo from "../../common/logo/Logo";
-import { FaFacebook, FaInstagram, FaTwitter, FaWhatsapp } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
 
 const Footer = () => {
   const iconStyles = "text-xl text-gray-600 hover:text-blue-500 transition";

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import axios from "axios";
 import { BASE_URLNew } from "../../../utils/apiRoutes.tsx";
 import { ButtonBg } from "../../shared/buttons/Buttons";
@@ -7,7 +7,7 @@ import {Link} from "react-router-dom";
 import logo from "/src/assets/react.svg"
 
 const Listings: React.FC = () => {
-    const [showAll, setShowAll] = useState(false);
+    const [showAll] = useState(false);
     const [filteredListings, setFilteredListings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const token = getAuthToken();
@@ -62,14 +62,17 @@ const Listings: React.FC = () => {
 
                             return (
                                 <Link to={`/listings/details/${listing.id}`} key={i} className="block">
-                                    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 relative">
+                                    <div
+                                        className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 relative">
                                         {/* For Rent Badge */}
-                                        <span className="absolute top-3 left-3 bg-yellow-400 text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
+                                        <span
+                                            className="absolute top-3 left-3 bg-yellow-400 text-white text-xs font-semibold px-3 py-1 rounded-full z-10">
             For rent
         </span>
 
                                         {/* Favorite Icon */}
-                                        <span className="absolute top-3 right-3 bg-white rounded-full p-1 shadow-md cursor-pointer">
+                                        <span
+                                            className="absolute top-3 right-3 bg-white rounded-full p-1 shadow-md cursor-pointer">
             ❤️
         </span>
 
@@ -82,10 +85,12 @@ const Listings: React.FC = () => {
                                             />
 
                                             <div className="absolute bottom-3 left-3 flex gap-2">
-                <span className="text-xs font-semibold px-3 py-1 border border-yellow-400 text-yellow-500 bg-white bg-opacity-70 rounded-md">
+                <span
+                    className="text-xs font-semibold px-3 py-1 border border-yellow-400 text-yellow-500 bg-white bg-opacity-70 rounded-md">
                     {listing.photos || 0} Photos
                 </span>
-                                                <span className="text-xs font-semibold px-3 py-1 border border-yellow-400 text-yellow-500 bg-white bg-opacity-70 rounded-md">
+                                                <span
+                                                    className="text-xs font-semibold px-3 py-1 border border-yellow-400 text-yellow-500 bg-white bg-opacity-70 rounded-md">
                     {listing.videos || 0} Videos
                 </span>
                                             </div>
@@ -135,12 +140,15 @@ const Listings: React.FC = () => {
                     {filteredListings.length > 3 && !showAll && (
                         <ButtonBg
                             className="bg-[#0018a8] text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-blue-900 transition-all"
-                            onClick={() => setShowAll(true)}
+                            onClick={() => {
+                                window.location.href = "/dashboard";
+                            }}
                         >
                             See All
                         </ButtonBg>
                     )}
                 </div>
+
             </div>
         </section>
     );

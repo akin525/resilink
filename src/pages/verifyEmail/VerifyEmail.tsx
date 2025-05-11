@@ -5,6 +5,7 @@ import Logo from "../../components/common/logo/Logo";
 import RoundLoader from "../../components/shared/loaders/RoundLoader";
 import { toast } from "react-toastify";
 import { toastOptions } from "../../utils/helpers";
+import InfoAlert from "../../components/shared/alerts/InfoAlert.tsx";
 
 const VerifyEmail = () => {
     const navigate = useNavigate();
@@ -109,22 +110,24 @@ const VerifyEmail = () => {
     };
 
     return (
-        <section className="w-full h-screen bg-[#f9fafb] flex flex-col items-center justify-center px-4">
-            {/* Logo */}
+        <section
+            className="w-full min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center px-4">
             <div className="absolute top-6 left-6">
-                <Logo color="black" />
+                <Logo color="black"/>
             </div>
 
-            {/* Content Card */}
-            <div className="w-full max-w-md bg-white rounded-xl shadow-md px-6 py-10">
-                <h2 className="text-2xl font-bold text-center mb-2 text-gray-900">Verify your Email</h2>
-                <p className="text-sm text-center text-gray-600 mb-6">
-                    Enter the 6-digit code sent to <span className="font-medium">{email}</span>
+            <div className="w-full max-w-md bg-white rounded-3xl shadow-lg px-8 py-10 border border-gray-100">
+                <h2 className="text-3xl font-bold text-center text-gray-900 mb-2">Verify Email</h2>
+                <p className="text-sm text-center text-gray-600 mb-4">
+                    Enter the 6-digit code sent to <span className="font-semibold text-blue-600">{email}</span>
                 </p>
 
-                {/* Verification Input */}
-                <form onSubmit={handleVerifyEmail} className="flex flex-col items-center">
-                    <div className="flex gap-3 mb-5">
+                <div className="mb-5">
+                    <InfoAlert message="Verification code sent. Not in inbox? Check spam folder."/>
+                </div>
+
+                <form onSubmit={handleVerifyEmail} className="flex flex-col items-center gap-4">
+                    <div className="flex gap-3 justify-center">
                         {verificationCode.map((value, index) => (
                             <input
                                 key={index}
@@ -134,33 +137,34 @@ const VerifyEmail = () => {
                                 onChange={(e) => handleChange(index, e.target.value)}
                                 onKeyDown={(e) => handleKeyDown(index, e)}
                                 maxLength={1}
-                                className="w-10 h-12 text-center border rounded-md border-gray-300 text-xl font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                                className="w-12 h-14 text-center text-xl font-bold rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all shadow-sm"
                             />
                         ))}
                     </div>
 
                     <ButtonBg
-                        className="w-full py-3 rounded-lg text-white font-semibold bg-blue-600 hover:bg-blue-700 transition disabled:opacity-50"
+                        className="w-full py-3 rounded-lg text-white font-semibold bg-blue-600 hover:bg-blue-700 transition-all disabled:opacity-50"
                         type="submit"
                         disabled={verificationCode.join("").trim().length !== 6 || loading}
                     >
-                        {loading ? <RoundLoader /> : "Verify"}
+                        {loading ? <RoundLoader/> : "Verify Email"}
                     </ButtonBg>
 
-                    <div className="mt-5 text-sm text-gray-500 flex items-center justify-center">
-                        Code expired?
+                    <div className="text-sm text-gray-600 mt-3">
+                        Didn’t receive code?
                         <button
                             type="button"
                             onClick={handleResendCode}
                             disabled={resendLoading}
-                            className="ml-1 text-blue-600 font-semibold hover:underline transition-all disabled:opacity-50"
+                            className="ml-1 font-semibold text-blue-600 hover:underline transition-all disabled:opacity-50"
                         >
-                            {resendLoading ? "Sending..." : "Resend"}
+                            {resendLoading ? "Resending..." : "Resend"}
                         </button>
                     </div>
                 </form>
             </div>
         </section>
+
     );
 };
 

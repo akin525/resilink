@@ -7,9 +7,9 @@ import RoundLoader from "../../components/shared/loaders/RoundLoader";
 import Logo from "../../components/common/logo/Logo";
 import { ButtonBg } from "../../components/shared/buttons/Buttons";
 import InfoAlert from "../../components/shared/alerts/InfoAlert";
-import google from "./Group.png";
-import apple from "./image 109.png";
-import facebook from "./image 143.png";
+// import google from "./Group.png";
+// import apple from "./image 109.png";
+// import facebook from "./image 143.png";
 import { BASE_URLNew } from "../../utils/apiRoutes.tsx";
 
 const Login = () => {
@@ -132,25 +132,25 @@ const Login = () => {
           </p>
 
           {/* Divider */}
-          <div className="w-full flex items-center my-5">
-            <hr className="flex-grow border-white opacity-30" />
-            <span className="mx-3 text-sm opacity-70">OR</span>
-            <hr className="flex-grow border-white opacity-30" />
-          </div>
+          {/*<div className="w-full flex items-center my-5">*/}
+          {/*  <hr className="flex-grow border-white opacity-30" />*/}
+          {/*  <span className="mx-3 text-sm opacity-70">OR</span>*/}
+          {/*  <hr className="flex-grow border-white opacity-30" />*/}
+          {/*</div>*/}
 
           {/* Social Login */}
-          <button className="w-full h-10 rounded-full flex items-center justify-center gap-3 bg-white text-black font-semibold mb-3">
-            <img src={google} className="w-5 h-5" alt="Google" />
-            Sign in with Google
-          </button>
-          <button className="w-full h-10 rounded-full flex items-center justify-center gap-3 bg-white text-black font-semibold mb-3">
-            <img src={apple} className="w-5 h-5" alt="Apple" />
-            Sign in with Apple
-          </button>
-          <button className="w-full h-10 rounded-full flex items-center justify-center gap-3 bg-white text-black font-semibold">
-            <img src={facebook} className="w-5 h-5" alt="Facebook" />
-            Sign in with Facebook
-          </button>
+          {/*<button className="w-full h-10 rounded-full flex items-center justify-center gap-3 bg-white text-black font-semibold mb-3">*/}
+          {/*  <img src={google} className="w-5 h-5" alt="Google" />*/}
+          {/*  Sign in with Google*/}
+          {/*</button>*/}
+          {/*<button className="w-full h-10 rounded-full flex items-center justify-center gap-3 bg-white text-black font-semibold mb-3">*/}
+          {/*  <img src={apple} className="w-5 h-5" alt="Apple" />*/}
+          {/*  Sign in with Apple*/}
+          {/*</button>*/}
+          {/*<button className="w-full h-10 rounded-full flex items-center justify-center gap-3 bg-white text-black font-semibold">*/}
+          {/*  <img src={facebook} className="w-5 h-5" alt="Facebook" />*/}
+          {/*  Sign in with Facebook*/}
+          {/*</button>*/}
         </div>
       </section>
   );
