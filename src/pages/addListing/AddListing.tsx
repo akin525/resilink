@@ -22,6 +22,9 @@ const AddListing: React.FC = () => {
         mode: "RENT",
         price: 0,
         rooms: 1,
+        kitchen: 1,
+        toilet: 1,
+        parlour: 1,
         address: "",
         posted_by:user?.id,
         city: "",
@@ -101,6 +104,9 @@ const AddListing: React.FC = () => {
             formData.append("commission", "1000"); // Assuming fixed commission
             formData.append("total_price", (data.price + 1000).toString()); // Assuming commission is added to price
             formData.append("rooms", data.rooms.toString());
+            formData.append("parlour", data.parlour.toString());
+            formData.append("kitchen", data.kitchen.toString());
+            formData.append("toilet", data.toilet.toString());
             formData.append("address", data.address);
             formData.append("state", data.state);
             formData.append("country", data.country);
@@ -269,6 +275,29 @@ const AddListing: React.FC = () => {
                                 label={"Rooms:"}
                                 type={"number"}
                                 name={"rooms"}
+                                placeholder={"0"}
+                                handleChange={handleChange}
+                            />
+                            <CustomInput
+                                label={"Kitchen:"}
+                                type={"number"}
+                                name={"kitchen"}
+                                placeholder={"0"}
+                                handleChange={handleChange}
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <CustomInput
+                                label={"Toilet:"}
+                                type={"number"}
+                                name={"toilet"}
+                                placeholder={"0"}
+                                handleChange={handleChange}
+                            />
+                            <CustomInput
+                                label={"Parlour:"}
+                                type={"number"}
+                                name={"parlour"}
                                 placeholder={"0"}
                                 handleChange={handleChange}
                             />

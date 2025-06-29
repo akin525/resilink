@@ -106,8 +106,9 @@ const Listings: React.FC = () => {
 
                                             <div className="flex flex-wrap text-sm mt-3 gap-4 font-light">
                                                 <span>• {listing.bedrooms || 0} Bedrooms</span>
-                                                <span>• {listing.pulsur || 0} Parlour</span>
+                                                <span>• {listing.pulour || 0} Parlour</span>
                                                 <span>• {listing.kitchen || 0} Kitchen</span>
+                                                <span>• {listing.toilet || 0} Toilet</span>
                                             </div>
                                         </div>
 
